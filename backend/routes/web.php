@@ -7,16 +7,6 @@ use App\Http\Controllers\Admin\TaskController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 
-// CORS headers for Sanctum CSRF cookie and other web routes
-Route::middleware(function ($request, $next) {
-    $response = $next($request);
-    $response->headers->set('Access-Control-Allow-Origin', 'https://quickdrive-1.onrender.com');
-    $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-XSRF-TOKEN');
-    $response->headers->set('Access-Control-Allow-Credentials', 'true');
-    return $response;
-});
-
 // Default welcome page
 Route::get('/', function () {
     return redirect('/login');
