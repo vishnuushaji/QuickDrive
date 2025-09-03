@@ -60,6 +60,14 @@ if [ ! -f .env ]; then\n\
     php artisan key:generate\n\
 fi\n\
 \n\
+# Run database migrations\n\
+php artisan migrate --force\n\
+\n\
+# Clear and cache config\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+php artisan view:cache\n\
+\n\
 # Set Apache port\n\
 sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf\n\
 \n\
