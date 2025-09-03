@@ -3,20 +3,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { taskService } from '../services/taskService';
 import toast from 'react-hot-toast';
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon, 
-  EyeIcon,
+import {
+  PlusIcon,
   EllipsisVerticalIcon,
   Squares2X2Icon,
   ListBulletIcon,
   CalendarDaysIcon,
   UserIcon,
-  ClipboardDocumentListIcon as ClipboardListIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon
+  ClipboardDocumentListIcon as ClipboardListIcon
 } from '@heroicons/react/24/outline';
 
 const Tasks = () => {

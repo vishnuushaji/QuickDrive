@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { userService } from '../services/userService';
 import toast from 'react-hot-toast';
-import { 
-  MagnifyingGlassIcon, 
+import {
+  MagnifyingGlassIcon,
   FunnelIcon,
   ChevronDownIcon,
   EllipsisVerticalIcon,
   ArrowUpTrayIcon,
-  CalendarIcon,
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
@@ -17,7 +16,6 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedSort, setSelectedSort] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);

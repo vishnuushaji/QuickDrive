@@ -21,20 +21,20 @@ const TaskDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchTask = async () => {
+      try {
+        const response = await taskService.getById(id);
+        setTask(response.data);
+      } catch (error) {
+        toast.error('Failed to fetch task details');
+        navigate('/tasks');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchTask();
   }, [id]);
-
-  const fetchTask = async () => {
-    try {
-      const response = await taskService.getById(id);
-      setTask(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch task details');
-      navigate('/tasks');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleStatusUpdate = async (newStatus) => {
     try {
