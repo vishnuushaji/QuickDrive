@@ -8,9 +8,15 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\DashboardController;
 
+// Handle preflight OPTIONS requests
+Route::options('{any}', function (Request $request) {
+    return response('', 200);
+})->where('any', '.*');
+
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {

@@ -53,6 +53,7 @@ EXPOSE 80
 ENV PORT=80
 
 # Startup script
+RUN # Startup script section
 RUN echo '#!/bin/bash\n\
 # Generate app key if missing\n\
 if [ ! -f .env ]; then\n\
@@ -60,23 +61,25 @@ if [ ! -f .env ]; then\n\
     php artisan key:generate\n\
 fi\n\
 \n\
+# Clear all caches first\n\
+php artisan config:clear\n\
+php artisan route:clear\n\
+\n\
 # Run database migrations\n\
 php artisan migrate --force || echo "Migration failed, continuing..."\n\
 \n\
 # Seed the database\n\
 php artisan db:seed --force || echo "Seeding failed, continuing..."\n\
 \n\
-# Clear and cache config\n\
-php artisan config:cache || echo "Config cache failed, continuing..."\n\
-php artisan route:cache || echo "Route cache failed, continuing..."\n\
-php artisan view:cache || echo "View cache failed, continuing..."\n\
+# Cache configurations\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
 \n\
 # Set Apache port\n\
 sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf\n\
 \n\
 # Start Apache\n\
 apache2-foreground' > /usr/local/bin/start.sh
-
 RUN chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]

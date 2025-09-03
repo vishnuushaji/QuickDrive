@@ -52,8 +52,8 @@ const EditProject = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await userService.getAll();
-      setUsers(response.data);
+      const response = await userService.getAllWithoutPagination();
+      setUsers(response.data.data);
     } catch (error) {
       toast.error('Failed to fetch users');
     }

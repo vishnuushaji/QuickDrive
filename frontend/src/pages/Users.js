@@ -19,15 +19,19 @@ const Users = () => {
   const [selectedSort, setSelectedSort] = useState('name');
   const [showFilters, setShowFilters] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     try {
-      const response = await userService.getAll();
-      setUsers(response.data);
+      const response = await userService.getAll(page);
+      setUsers(response.data.data);
+      setPagination(response.data);
+      setCurrentPage(page);
     } catch (error) {
       toast.error('Failed to fetch users');
     } finally {
@@ -107,7 +111,7 @@ const Users = () => {
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Showing <span className="font-semibold text-gray-900 dark:text-gray-100">{filteredUsers.length}</span> of{' '}
-              <span className="font-semibold text-gray-900 dark:text-gray-100">{users.length}</span> users
+              <span className="font-semibold text-gray-900 dark:text-gray-100">{pagination ? pagination.total : users.length}</span> users
             </p>
           </div>
           
@@ -264,6 +268,53 @@ const Users = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.last_page > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+              <p>
+                Showing <span className="font-medium">{pagination.from}</span> to{' '}
+                <span className="font-medium">{pagination.to}</span> of{' '}
+                <span className="font-medium">{pagination.total}</span> results
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => fetchUsers(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => fetchUsers(page)}
+                      className={`px-3 py-1 text-sm font-medium rounded-md ${
+                        currentPage === page
+                          ? 'text-blue-600 bg-blue-50 border border-blue-500'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() => fetchUsers(currentPage + 1)}
+                disabled={currentPage === pagination.last_page}
+                className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

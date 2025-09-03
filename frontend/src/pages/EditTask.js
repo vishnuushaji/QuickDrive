@@ -38,8 +38,8 @@ const EditTask = () => {
     try {
       const [taskRes, projectsRes, usersRes] = await Promise.all([
         taskService.getById(id),
-        projectService.getAll(),
-        userService.getAll()
+        projectService.getAllWithoutPagination(),
+        userService.getAllWithoutPagination()
       ]);
 
       const task = taskRes.data;
@@ -53,8 +53,8 @@ const EditTask = () => {
         attachment: null,
       });
 
-      setProjects(projectsRes.data);
-      setUsers(usersRes.data.filter(user => user.role === 'developer'));
+      setProjects(projectsRes.data.data);
+      setUsers(usersRes.data.data.filter(user => user.role === 'developer'));
     } catch (error) {
       toast.error('Failed to fetch task');
       navigate('/tasks');

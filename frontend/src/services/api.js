@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
-const BASE_URL = API_URL.replace('/api', '') || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -9,7 +8,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Important for CSRF
 });
 
 // Request interceptor to add Bearer token

@@ -15,19 +15,21 @@ use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
+
         if ($user->isSuperAdmin()) {
-            $tasks = Task::with(['project', 'assignedUser'])->get();
+            $tasks = Task::with(['project', 'assignedUser'])->paginate($perPage);
         } elseif ($user->isClient()) {
             $projectIds = $user->projects()->wherePivot('role', 'client')->pluck('projects.id');
             $tasks = Task::whereIn('project_id', $projectIds)
                         ->with(['project', 'assignedUser'])
-                        ->get();
+                        ->paginate($perPage);
         } else {
-            $tasks = $user->assignedTasks()->with(['project', 'assignedUser'])->get();
+            $tasks = $user->assignedTasks()->with(['project', 'assignedUser'])->paginate($perPage);
         }
 
         return response()->json($tasks);

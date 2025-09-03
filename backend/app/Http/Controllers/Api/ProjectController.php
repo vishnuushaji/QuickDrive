@@ -10,19 +10,21 @@ use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = auth()->user();
-            
+
             if (!$user) {
                 return response()->json(['error' => 'Unauthenticated'], 401);
             }
 
+            $perPage = $request->get('per_page', 10);
+
             if ($user->isSuperAdmin()) {
-                $projects = Project::with(['users', 'tasks'])->get();
+                $projects = Project::with(['users', 'tasks'])->paginate($perPage);
             } else {
-                $projects = $user->projects()->with(['users', 'tasks'])->get();
+                $projects = $user->projects()->with(['users', 'tasks'])->paginate($perPage);
             }
 
             // Add progress to each project

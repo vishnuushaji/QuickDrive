@@ -31,11 +31,11 @@ const CreateTask = () => {
   const fetchData = async () => {
     try {
       const [projectsRes, usersRes] = await Promise.all([
-        projectService.getAll(),
-        userService.getAll(),
+        projectService.getAllWithoutPagination(),
+        userService.getAllWithoutPagination(),
       ]);
-      setProjects(projectsRes.data || []);
-      setUsers((usersRes.data || []).filter((u) => u.role === 'developer'));
+      setProjects(projectsRes.data.data || []);
+      setUsers((usersRes.data.data || []).filter((u) => u.role === 'developer'));
     } catch (error) {
       toast.error('Failed to fetch data');
     }

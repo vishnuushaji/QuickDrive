@@ -23,16 +23,20 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid');
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
     fetchProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (page = 1) => {
     try {
-      const response = await projectService.getAll();
+      const response = await projectService.getAll(page);
       console.log('Projects response:', response); // Debug log
-      setProjects(response.data);
+      setProjects(response.data.data);
+      setPagination(response.data);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Project fetch error:', error); // Debug log
       if (error.response?.status === 401) {
@@ -122,7 +126,7 @@ const Projects = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-          {projects.length} Projects
+          {pagination ? pagination.total : projects.length} Projects
         </h1>
         <div className="flex items-center gap-3">
           {isSuperAdmin && (
@@ -438,8 +442,55 @@ const Projects = () => {
         ))}
       </div>
 
+      {/* Pagination */}
+      {pagination && pagination.last_page > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+            <p>
+              Showing <span className="font-medium">{pagination.from}</span> to{' '}
+              <span className="font-medium">{pagination.to}</span> of{' '}
+              <span className="font-medium">{pagination.total}</span> results
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => fetchProjects(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => fetchProjects(page)}
+                    className={`px-3 py-1 text-sm font-medium rounded-md ${
+                      currentPage === page
+                        ? 'text-blue-600 bg-blue-50 border border-blue-500'
+                        : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => fetchProjects(currentPage + 1)}
+              disabled={currentPage === pagination.last_page}
+              className="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Empty State */}
-      {projects.length === 0 && (
+      {(pagination ? pagination.total === 0 : projects.length === 0) && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <Squares2X2Icon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
