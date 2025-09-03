@@ -14,10 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Laravel 12 has built-in CORS, just configure it
-        $middleware->use([
-            \Illuminate\Http\Middleware\HandleCors::class,
+        // Temporarily remove CSRF from web middleware group for testing
+        $middleware->web(remove: [
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
         ]);
+
+        // Remove Sanctum stateful middleware from API routes to avoid CSRF issues
+        // $middleware->api(prepend: [
+        //     \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        // ]);
 
         // Keep your existing aliases
         $middleware->alias([

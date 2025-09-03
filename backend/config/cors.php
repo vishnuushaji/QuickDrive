@@ -1,19 +1,15 @@
 <?php
 
 return [
-    'paths' => ['api/*'],
-    
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    
-    'allowed_origins' => ['*'], // Allow all origins for API
-    
+    'allowed_origins' => [
+        'http://localhost:3000',          // local dev
+        'https://quickdrive-1.onrender.com', // Render frontend
+    ],
     'allowed_origins_patterns' => [],
-    
     'allowed_headers' => ['*'],
-    
     'exposed_headers' => [],
-    
     'max_age' => 0,
-    
-    'supports_credentials' => false, // No credentials needed for Bearer tokens
+    'supports_credentials' => true,
 ];
