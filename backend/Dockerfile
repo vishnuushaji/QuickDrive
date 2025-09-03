@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Enable Apache modules
-RUN a2enmod rewrite headers
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
 # Copy composer files + artisan first for caching & package discovery
 COPY composer.json composer.lock artisan ./
@@ -37,28 +37,13 @@ RUN chown -R www-data:www-data /var/www/html \
 # Install Node dependencies and build assets
 RUN npm install && npm run build
 
-# Apache configuration with CORS headers
+# Apache configuration
 RUN echo '<VirtualHost *:${PORT}>\n\
     DocumentRoot /var/www/html/public\n\
-    \n\
-    Header always set Access-Control-Allow-Origin "https://quickdrive-1.onrender.com"\n\
-    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
-    Header always set Access-Control-Allow-Headers "Accept, Authorization, Content-Type, X-Requested-With"\n\
-    \n\
-    RewriteEngine On\n\
-    RewriteCond %{REQUEST_METHOD} OPTIONS\n\
-    RewriteRule ^(.*)$ $1 [R=200,L]\n\
-    \n\
     <Directory /var/www/html/public>\n\
         AllowOverride All\n\
         Require all granted\n\
-        \n\
-        RewriteEngine On\n\
-        RewriteCond %{REQUEST_FILENAME} !-d\n\
-        RewriteCond %{REQUEST_FILENAME} !-f\n\
-        RewriteRule ^ index.php [L]\n\
     </Directory>\n\
-    \n\
     ErrorLog ${APACHE_LOG_DIR}/error.log\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf

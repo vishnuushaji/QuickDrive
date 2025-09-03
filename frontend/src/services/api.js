@@ -9,7 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  // No withCredentials needed for Bearer token auth
+  withCredentials: true, // Important for CSRF
 });
 
 // Request interceptor to add Bearer token
