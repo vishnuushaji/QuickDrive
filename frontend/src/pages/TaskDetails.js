@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { taskService } from '../services/taskService';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,21 +20,21 @@ const TaskDetails = () => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const response = await taskService.getById(id);
-        setTask(response.data);
-      } catch (error) {
-        toast.error('Failed to fetch task details');
-        navigate('/tasks');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTask = useCallback(async () => {
+    try {
+      const response = await taskService.getById(id);
+      setTask(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch task details');
+      navigate('/tasks');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate]);
 
+  useEffect(() => {
     fetchTask();
-  }, [id]);
+  }, [fetchTask]);
 
   const handleStatusUpdate = async (newStatus) => {
     try {
