@@ -1,5 +1,5 @@
 <?php
-// bootstrap/app.php
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,17 +14,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Enable CORS middleware
-        $middleware->api(prepend: [
-            \Illuminate\Http\Middleware\HandleCors::class,
-        ]);
-        
-        // For API-only authentication, you can remove CSRF from web routes
-        // but keep Sanctum middleware for API routes
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        // Temporarily remove CSRF from web middleware group for testing
+        $middleware->web(remove: [
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
         ]);
 
+        // Remove Sanctum stateful middleware from API routes to avoid CSRF issues
+        // $middleware->api(prepend: [
+        //     \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        // ]);
+
+        // Keep your existing aliases
         $middleware->alias([
             'super_admin' => SuperAdminOnly::class,
             'role' => CheckRole::class,

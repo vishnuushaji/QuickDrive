@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Enable Apache mod_rewrite and headers
-RUN a2enmod rewrite headers
+# Enable Apache mod_rewrite (remove headers module)
+RUN a2enmod rewrite
 
 # Copy composer files + artisan first for caching
 COPY composer.json composer.lock artisan ./
