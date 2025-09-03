@@ -63,6 +63,9 @@ fi\n\
 # Run database migrations\n\
 php artisan migrate --force || echo "Migration failed, continuing..."\n\
 \n\
+# Seed the database\n\
+php artisan db:seed --force || echo "Seeding failed, continuing..."\n\
+\n\
 # Clear and cache config\n\
 php artisan config:cache || echo "Config cache failed, continuing..."\n\
 php artisan route:cache || echo "Route cache failed, continuing..."\n\
