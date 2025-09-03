@@ -63,9 +63,9 @@ echo "Publishing Sanctum migrations..."\n\
 php artisan vendor:publish --provider="Laravel\\\\Sanctum\\\\SanctumServiceProvider" --force\n\
 php artisan migrate --force\n\
 \n\
-# Seed the database\n\
-echo "Seeding database..."\n\
-php artisan db:seed --force || echo "Seeding completed or failed"\n\
+# Seed the database with UserSeeder only\n\
+echo "Seeding database with users..."\n\
+php artisan db:seed --class=UserSeeder --force || echo "User seeding completed or failed"\n\
 \n\
 # Clear and cache\n\
 echo "Clearing and caching config..."\n\
@@ -76,6 +76,12 @@ php artisan config:cache\n\
 sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf\n\
 \n\
 echo "Application setup complete! Starting Apache..."\n\
+echo "================================="\n\
+echo "Default login credentials:"\n\
+echo "Admin: admin@quickdrive.com / password123"\n\
+echo "Developer: developer@quickdrive.com / password123"\n\
+echo "Client: client@quickdrive.com / password123"\n\
+echo "================================="\n\
 # Start Apache\n\
 apache2-foreground' > /start.sh && chmod +x /start.sh
 
