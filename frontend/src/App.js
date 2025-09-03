@@ -19,6 +19,7 @@ import TaskDetails from './pages/TaskDetails';
 import Users from './pages/Users';
 import CreateUser from './pages/CreateUser';
 import EditUser from './pages/EditUser';
+import Profile from './pages/Profile';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -61,6 +62,12 @@ function App() {
           <Route path="/dashboard" element={
             <ProtectedLayout>
               <Dashboard />
+            </ProtectedLayout>
+          } />
+
+          <Route path="/profile" element={
+            <ProtectedLayout>
+              <Profile />
             </ProtectedLayout>
           } />
 

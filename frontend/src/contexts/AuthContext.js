@@ -70,11 +70,16 @@ const register = async (userData) => {
     }
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
+    updateUser,
     loading,
     isAuthenticated: !!user,
     isSuperAdmin: user?.role === 'super_admin',

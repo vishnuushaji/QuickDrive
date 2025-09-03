@@ -36,36 +36,35 @@ const TaskDetails = () => {
     fetchTask();
   }, [fetchTask]);
 
-  const handleStatusUpdate = async (newStatus) => {
-    try {
-      await taskService.updateStatus(id, newStatus);
-      toast.success('Status updated successfully');
-      fetchTask();
-    } catch (error) {
-      toast.error('Failed to update status');
-    }
-  };
+const handleStatusUpdate = async (newStatus) => {
+  try {
+    await taskService.updateStatus(id, newStatus);
+    toast.success('Status updated successfully');
+    navigate('/tasks', { replace: true });
+  } catch (error) {
+    toast.error('Failed to update status');
+  }
+};
 
-  const handleApprove = async () => {
-    try {
-      await taskService.approve(id);
-      toast.success('Task approved successfully');
-      fetchTask();
-    } catch (error) {
-      toast.error('Failed to approve task');
-    }
-  };
+const handleApprove = async () => {
+  try {
+    await taskService.approve(id);
+    toast.success('Task approved successfully');
+    navigate('/tasks', { replace: true });
+  } catch (error) {
+    toast.error('Failed to approve task');
+  }
+};
 
-  const handleReject = async () => {
-    try {
-      await taskService.reject(id);
-      toast.success('Task rejected');
-      fetchTask();
-    } catch (error) {
-      toast.error('Failed to reject task');
-    }
-  };
-
+const handleReject = async () => {
+  try {
+    await taskService.reject(id);
+    toast.success('Task rejected');
+    navigate('/tasks', { replace: true });
+  } catch (error) {
+    toast.error('Failed to reject task');
+  }
+};
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
@@ -106,8 +105,8 @@ const TaskDetails = () => {
     return <div className="text-center py-4 text-gray-600 dark:text-gray-400">Task not found</div>;
   }
 
-  const canEdit = isSuperAdmin || (isDeveloper && task.assigned_user_id === user?.id);
-  const canDelete = isSuperAdmin;
+  const canEdit = isSuperAdmin;
+  const canDelete = isSuperAdmin || (isDeveloper && task.assigned_user_id === user?.id);
   const canApprove = isClient && task.status === 'completed';
   const canUpdateStatus = isDeveloper && task.assigned_user_id === user?.id;
 
