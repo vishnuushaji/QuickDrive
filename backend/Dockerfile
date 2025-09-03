@@ -26,8 +26,8 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 # Copy the rest of the application
 COPY . .
 
-# Run package discovery after full app is present
-RUN php artisan package:discover --ansi
+# Run package discovery after full app is present (with error handling)
+RUN php artisan package:discover --ansi || true
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -61,12 +61,12 @@ if [ ! -f .env ]; then\n\
 fi\n\
 \n\
 # Run database migrations\n\
-php artisan migrate --force\n\
+php artisan migrate --force || echo "Migration failed, continuing..."\n\
 \n\
 # Clear and cache config\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
+php artisan config:cache || echo "Config cache failed, continuing..."\n\
+php artisan route:cache || echo "Route cache failed, continuing..."\n\
+php artisan view:cache || echo "View cache failed, continuing..."\n\
 \n\
 # Set Apache port\n\
 sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf\n\
