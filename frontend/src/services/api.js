@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+const API_URL = process.env.REACT_APP_API_BASE_URL || 'https://quickdrive-9xxc.onrender.com/api' || 'http://localhost:8000/api';
 const BASE_URL = API_URL.replace('/api', '') || 'http://localhost:8000';
 
 const api = axios.create({
@@ -9,14 +9,17 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Important for CSRF
+  withCredentials: true,
 });
 
-// Get CSRF cookie before making requests
+// For production, simplify the CSRF approach
 const getCsrfToken = async () => {
   try {
     await axios.get(`${BASE_URL}/sanctum/csrf-cookie`, {
-      withCredentials: true
+      withCredentials: true,
+      headers: {
+        'Accept': 'application/json',
+      }
     });
   } catch (error) {
     console.error('Failed to get CSRF token:', error);
@@ -31,15 +34,15 @@ const getCookie = (name) => {
   return null;
 };
 
-// Request interceptor to add token
+// Request interceptor
 api.interceptors.request.use(
   async (config) => {
-    // Get CSRF token for non-GET requests
-    if (config.method !== 'get') {
+    // For non-GET requests, get CSRF token
+    if (['post', 'put', 'patch', 'delete'].includes(config.method)) {
       await getCsrfToken();
       const xsrfToken = getCookie('XSRF-TOKEN');
       if (xsrfToken) {
-        config.headers['X-XSRF-TOKEN'] = xsrfToken;
+        config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken);
       }
     }
 
@@ -55,14 +58,17 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );
