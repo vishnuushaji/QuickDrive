@@ -51,22 +51,31 @@ export DB_PASSWORD=npg_0CUOjSHGfdh1\n\
 export DB_SSLMODE=require\n\
 \n\
 # Test connection\n\
+echo "Testing database connection..."\n\
 php artisan db:show || echo "Database connection test failed"\n\
 \n\
 # Run migrations\n\
+echo "Running migrations..."\n\
 php artisan migrate --force || echo "Migrations failed"\n\
 \n\
 # Create Sanctum tables if missing\n\
+echo "Publishing Sanctum migrations..."\n\
 php artisan vendor:publish --provider="Laravel\\\\Sanctum\\\\SanctumServiceProvider" --force\n\
 php artisan migrate --force\n\
 \n\
+# Seed the database\n\
+echo "Seeding database..."\n\
+php artisan db:seed --force || echo "Seeding completed or failed"\n\
+\n\
 # Clear and cache\n\
+echo "Clearing and caching config..."\n\
 php artisan config:clear\n\
 php artisan config:cache\n\
 \n\
 # Set Apache port\n\
 sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf\n\
 \n\
+echo "Application setup complete! Starting Apache..."\n\
 # Start Apache\n\
 apache2-foreground' > /start.sh && chmod +x /start.sh
 
