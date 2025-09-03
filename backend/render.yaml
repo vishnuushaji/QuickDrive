@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: project-management-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_NAME
+        value: Project Management System
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: postgresql
+      - key: DB_HOST
+        fromDatabase:
+          name: project_db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: project_db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: project_db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: project_db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: project_db
+          property: password
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        value: your-email@gmail.com
+      - key: MAIL_PASSWORD
+        value: your-app-password
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        value: your-email@gmail.com
+      - key: MAIL_FROM_NAME
+        value: Project Management System
+      - key: QUEUE_CONNECTION
+        value: database
+
+databases:
+  - name: project_db
+    databaseName: project_management
+    user: project_user
+    plan: starter
