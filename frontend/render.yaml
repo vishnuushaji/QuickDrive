@@ -1,9 +1,9 @@
 services:
   - type: web
     name: quickdrive-frontend
-    staticSiteGenerator: react
+    runtime: static
     buildCommand: npm run build
-    publishDir: build
+    rootDir: build
     envVars:
       - key: REACT_APP_API_BASE_URL
         value: https://quickdrive-9xxc.onrender.com/api
