@@ -89,7 +89,7 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'assigned_user_id' => 'nullable|exists:users,id',
+            'assigned_user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'required|in:normal,urgent,top_urgent',
@@ -98,15 +98,6 @@ class TaskController extends Controller
             'hours' => 'nullable|integer|min:1',
             'attachment' => 'nullable|file|max:10240'
         ]);
-
-        // Auto-assign to first developer if none selected
-        if (empty($validated['assigned_user_id'])) {
-            $project = Project::find($validated['project_id']);
-            $firstDeveloper = $project->developers()->first();
-            if ($firstDeveloper) {
-                $validated['assigned_user_id'] = $firstDeveloper->id;
-            }
-        }
 
         if ($request->hasFile('attachment')) {
             $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
@@ -198,7 +189,7 @@ class TaskController extends Controller
             // Full validation for super admins
             $validated = $request->validate([
                 'project_id' => 'required|exists:projects,id',
-                'assigned_user_id' => 'nullable|exists:users,id',
+                'assigned_user_id' => 'required|exists:users,id',
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'status' => 'required|in:pending,in_progress,completed,approved,rejected',

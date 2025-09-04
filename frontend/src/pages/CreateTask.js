@@ -22,7 +22,7 @@ const CreateTask = () => {
     assigned_user_id: '',
     priority: 'normal',
     status: 'pending',
-    start_date: '',
+    start_date: new Date().toLocaleDateString('en-CA'),
     due_date: '',
     hours: '',
     attachment: null,
@@ -70,6 +70,11 @@ const CreateTask = () => {
     // Project
     if (!formData.project_id) {
       newErrors.project_id = 'Project is required';
+    }
+
+    // Assigned User
+    if (!formData.assigned_user_id) {
+      newErrors.assigned_user_id = 'Developer is required';
     }
 
     // Priority
@@ -140,6 +145,11 @@ const CreateTask = () => {
       case 'project_id':
         if (!value) fieldErrors.project_id = 'Project is required';
         else delete fieldErrors.project_id;
+        break;
+
+      case 'assigned_user_id':
+        if (!value) fieldErrors.assigned_user_id = 'Developer is required';
+        else delete fieldErrors.assigned_user_id;
         break;
 
       case 'priority':
@@ -377,25 +387,34 @@ const CreateTask = () => {
                 {/* Assign To */}
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Assign To
+                    Assign To *
                   </label>
                   <select
                     name="assigned_user_id"
                     value={formData.assigned_user_id}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200"
+                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 ${
+                      errors.assigned_user_id && touched.assigned_user_id
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                        : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-200'
+                    }`}
                   >
-                    <option value="">Select a developer (auto-assigned if empty)</option>
+                    <option value="">Select a developer</option>
                     {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.name}
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    If no developer is selected, the task will be automatically assigned to the first developer in the project.
-                  </p>
+                  {errors.assigned_user_id && touched.assigned_user_id && (
+                    <p className="text-red-600 text-sm flex items-center mt-1">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.assigned_user_id}
+                    </p>
+                  )}
                 </div>
               </div>
 
