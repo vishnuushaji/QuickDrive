@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { taskService } from '../services/taskService';
 import toast from 'react-hot-toast';
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon, 
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
   EyeIcon,
   EllipsisVerticalIcon,
   Squares2X2Icon,
@@ -16,11 +16,12 @@ import {
   ClipboardDocumentListIcon as ClipboardListIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ClockIcon
+  ClockIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 
 const Tasks = () => {
-  const { isSuperAdmin, isDeveloper, user } = useAuth();
+  const { isSuperAdmin, isDeveloper, isClient, user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid');
@@ -79,6 +80,26 @@ const Tasks = () => {
       fetchTasks(currentPage); // Refetch current page with current filters
     } catch (error) {
       toast.error('Failed to update status');
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await taskService.approve(id);
+      toast.success('Task approved successfully');
+      fetchTasks(currentPage); // Refetch current page with current filters
+    } catch (error) {
+      toast.error('Failed to approve task');
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await taskService.reject(id);
+      toast.success('Task rejected');
+      fetchTasks(currentPage); // Refetch current page with current filters
+    } catch (error) {
+      toast.error('Failed to reject task');
     }
   };
 
@@ -318,6 +339,26 @@ const Tasks = () => {
                     </select>
                   </div>
                 )}
+
+                {/* Client Actions for Completed Tasks */}
+                {isClient && task.status === 'completed' && (
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => handleApprove(task.id)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+                    >
+                      <CheckCircleIcon className="h-4 w-4" />
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleReject(task.id)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                    >
+                      <XCircleIcon className="h-4 w-4" />
+                      Reject
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -407,6 +448,26 @@ const Tasks = () => {
                           <option value="in_progress">In Progress</option>
                           <option value="completed">Completed</option>
                         </select>
+                      </div>
+                    )}
+
+                    {/* Client Actions for Completed Tasks */}
+                    {isClient && task.status === 'completed' && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(task.id)}
+                          className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
+                        >
+                          <CheckCircleIcon className="h-3 w-3" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(task.id)}
+                          className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                        >
+                          <XCircleIcon className="h-3 w-3" />
+                          Reject
+                        </button>
                       </div>
                     )}
                   </div>
