@@ -247,9 +247,9 @@ const CreateUser = () => {
                 onBlur={handleBlur}
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
               >
-                <option value="developer">👨‍💻 Developer</option>
-                <option value="client">👤 Client</option>
-                <option value="super_admin">🛡️ Super Admin</option>
+                <option value="developer">Developer</option>
+                <option value="client">Client</option>
+                <option value="super_admin">Super Admin</option>
               </select>
             </div>
 

@@ -20,17 +20,41 @@ class TaskController extends Controller
         $user = auth()->user();
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
+        $search = $request->get('search', '');
+        $statusFilter = $request->get('status', '');
 
+        $query = Task::with(['project', 'assignedUser']);
+
+        // Apply user-based filtering
         if ($user->isSuperAdmin()) {
-            $tasks = Task::with(['project', 'assignedUser'])->paginate($perPage);
+            // Super admin sees all tasks
         } elseif ($user->isClient()) {
             $projectIds = $user->projects()->wherePivot('role', 'client')->pluck('projects.id');
-            $tasks = Task::whereIn('project_id', $projectIds)
-                        ->with(['project', 'assignedUser'])
-                        ->paginate($perPage);
+            $query->whereIn('project_id', $projectIds);
         } else {
-            $tasks = $user->assignedTasks()->with(['project', 'assignedUser'])->paginate($perPage);
+            $query->where('assigned_user_id', $user->id);
         }
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%')
+                  ->orWhereHas('project', function ($projectQuery) use ($search) {
+                      $projectQuery->where('name', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('assignedUser', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Apply status filter
+        if (!empty($statusFilter) && $statusFilter !== 'all') {
+            $query->where('status', $statusFilter);
+        }
+
+        $tasks = $query->paginate($perPage);
 
         return response()->json($tasks);
     }
@@ -44,6 +68,9 @@ class TaskController extends Controller
             'assigned_user_id' => 'nullable|exists:users,id',
             'priority' => 'required|in:normal,urgent,top_urgent',
             'status' => 'required|in:pending,in_progress,completed,approved,rejected',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date|after_or_equal:start_date',
+            'hours' => 'nullable|integer|min:1',
             'attachment' => 'nullable|file|max:10240',
         ]);
 
@@ -78,6 +105,9 @@ class TaskController extends Controller
             'assigned_user_id' => 'nullable|exists:users,id',
             'priority' => 'required|in:normal,urgent,top_urgent',
             'status' => 'required|in:pending,in_progress,completed,approved,rejected',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date|after_or_equal:start_date',
+            'hours' => 'nullable|integer|min:1',
             'attachment' => 'nullable|file|max:10240',
         ]);
 

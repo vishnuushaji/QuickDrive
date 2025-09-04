@@ -22,6 +22,9 @@ const EditTask = () => {
     assigned_user_id: '',
     priority: 'normal',
     status: 'pending',
+    start_date: '',
+    due_date: '',
+    hours: '',
     attachment: null,
   });
 
@@ -43,6 +46,14 @@ const EditTask = () => {
       ]);
 
       const task = taskRes.data;
+
+      // Format dates for HTML date input (YYYY-MM-DD)
+      const formatDateForInput = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      };
+
       setFormData({
         title: task.title,
         description: task.description || '',
@@ -50,6 +61,9 @@ const EditTask = () => {
         assigned_user_id: task.assigned_user_id || '',
         priority: task.priority,
         status: task.status,
+        start_date: formatDateForInput(task.start_date),
+        due_date: formatDateForInput(task.due_date),
+        hours: task.hours || '',
         attachment: null,
       });
 
@@ -91,6 +105,26 @@ const EditTask = () => {
     // Status
     if (!['pending', 'in_progress', 'completed', 'approved', 'rejected'].includes(formData.status)) {
       newErrors.status = 'Invalid status selected';
+    }
+
+    // Start Date (optional)
+    if (formData.start_date && !/^\d{4}-\d{2}-\d{2}$/.test(formData.start_date)) {
+      newErrors.start_date = 'Start date must be in YYYY-MM-DD format';
+    }
+
+    // Due Date (optional)
+    if (formData.due_date && !/^\d{4}-\d{2}-\d{2}$/.test(formData.due_date)) {
+      newErrors.due_date = 'Due date must be in YYYY-MM-DD format';
+    }
+
+    // Due Date after Start Date
+    if (formData.start_date && formData.due_date && formData.start_date > formData.due_date) {
+      newErrors.due_date = 'Due date must be after or equal to start date';
+    }
+
+    // Hours (optional)
+    if (formData.hours && (isNaN(formData.hours) || parseInt(formData.hours) < 1)) {
+      newErrors.hours = 'Hours must be a positive number';
     }
 
     // Attachment (optional)
@@ -143,6 +177,28 @@ const EditTask = () => {
         else delete fieldErrors.status;
         break;
 
+      case 'start_date': {
+        const v = value.trim();
+        if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) fieldErrors.start_date = 'Start date must be in YYYY-MM-DD format';
+        else delete fieldErrors.start_date;
+        break;
+      }
+
+      case 'due_date': {
+        const v = value.trim();
+        if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) fieldErrors.due_date = 'Due date must be in YYYY-MM-DD format';
+        else if (v && formData.start_date && v < formData.start_date) fieldErrors.due_date = 'Due date must be after or equal to start date';
+        else delete fieldErrors.due_date;
+        break;
+      }
+
+      case 'hours': {
+        const v = value.trim();
+        if (v && (isNaN(v) || parseInt(v) < 1)) fieldErrors.hours = 'Hours must be a positive number';
+        else delete fieldErrors.hours;
+        break;
+      }
+
       case 'attachment': {
         const file = value;
         if (file) {
@@ -173,6 +229,9 @@ const EditTask = () => {
       assigned_user_id: true,
       priority: true,
       status: true,
+      start_date: true,
+      due_date: true,
+      hours: true,
       attachment: true,
     });
 
@@ -421,6 +480,92 @@ const EditTask = () => {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>
                       {errors.status}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Start Date */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    name="start_date"
+                    value={formData.start_date}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 ${
+                      errors.start_date && touched.start_date
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                        : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-200'
+                    }`}
+                  />
+                  {errors.start_date && touched.start_date && (
+                    <p className="text-red-600 text-sm flex items-center mt-1">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.start_date}
+                    </p>
+                  )}
+                </div>
+
+                {/* Due Date */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    name="due_date"
+                    value={formData.due_date}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    min={formData.start_date || undefined}
+                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 ${
+                      errors.due_date && touched.due_date
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                        : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-200'
+                    }`}
+                  />
+                  {errors.due_date && touched.due_date && (
+                    <p className="text-red-600 text-sm flex items-center mt-1">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.due_date}
+                    </p>
+                  )}
+                </div>
+
+                {/* Hours */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Estimated Hours
+                  </label>
+                  <input
+                    type="number"
+                    name="hours"
+                    value={formData.hours}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    min="1"
+                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 ${
+                      errors.hours && touched.hours
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                        : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-200'
+                    }`}
+                    placeholder="e.g., 8"
+                  />
+                  {errors.hours && touched.hours && (
+                    <p className="text-red-600 text-sm flex items-center mt-1">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.hours}
                     </p>
                   )}
                 </div>

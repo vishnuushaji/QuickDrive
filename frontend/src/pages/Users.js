@@ -6,6 +6,7 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   ChevronDownIcon,
+  ChevronUpIcon,
   EllipsisVerticalIcon,
   ArrowUpTrayIcon,
   PencilIcon,
@@ -16,7 +17,8 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSort, setSelectedSort] = useState('name');
+  const [sortField, setSortField] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [showFilters, setShowFilters] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,6 +53,47 @@ const Users = () => {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortedUsers = () => {
+    const filtered = users.filter(user => 
+      (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return filtered.sort((a, b) => {
+      let aVal, bVal;
+
+      switch (sortField) {
+        case 'name':
+          aVal = (a.name || '').toLowerCase();
+          bVal = (b.name || '').toLowerCase();
+          break;
+        case 'email':
+          aVal = (a.email || '').toLowerCase();
+          bVal = (b.email || '').toLowerCase();
+          break;
+        case 'role':
+          aVal = (a.role || '').toLowerCase();
+          bVal = (b.role || '').toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
   const getRoleBadge = (role) => {
     const badges = {
       super_admin: { text: 'Super Admin', className: 'bg-purple-100 text-purple-700' },
@@ -61,14 +104,19 @@ const Users = () => {
   };
 
   const getUserAvatar = (user) => {
-    const avatarNumber = (user.id % 5) + 1;
-    return `/assets/media/avatars/300-${avatarNumber}.jpg`;
+    return user.name ? user.name.charAt(0).toUpperCase() : '?';
   };
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const renderSortIcon = (field) => {
+    if (sortField !== field) {
+      return <ChevronDownIcon className="h-3 w-3 opacity-30" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ChevronUpIcon className="h-3 w-3" /> : 
+      <ChevronDownIcon className="h-3 w-3" />;
+  };
+
+  const sortedUsers = getSortedUsers();
 
   if (loading) {
     return (
@@ -110,7 +158,7 @@ const Users = () => {
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Showing <span className="font-semibold text-gray-900 dark:text-gray-100">{filteredUsers.length}</span> of{' '}
+              Showing <span className="font-semibold text-gray-900 dark:text-gray-100">{sortedUsers.length}</span> of{' '}
               <span className="font-semibold text-gray-900 dark:text-gray-100">{pagination ? pagination.total : users.length}</span> users
             </p>
           </div>
@@ -126,18 +174,7 @@ const Users = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
-            <select
-              value={selectedSort}
-              onChange={(e) => setSelectedSort(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="name">Sort by Name</option>
-              <option value="email">Sort by Email</option>
-              <option value="role">Sort by Role</option>
-              <option value="created">Sort by Date</option>
-            </select>
-
+            
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -159,22 +196,31 @@ const Users = () => {
                   </div>
                 </th>
                 <th className="text-left py-3 px-6">
-                  <div className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <button
+                    onClick={() => handleSort('name')}
+                    className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
+                  >
                     User
-                    <ChevronDownIcon className="h-3 w-3" />
-                  </div>
+                    {renderSortIcon('name')}
+                  </button>
                 </th>
                 <th className="text-left py-3 px-6">
-                  <div className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <button
+                    onClick={() => handleSort('email')}
+                    className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
+                  >
                     Email
-                    <ChevronDownIcon className="h-3 w-3" />
-                  </div>
+                    {renderSortIcon('email')}
+                  </button>
                 </th>
                 <th className="text-left py-3 px-6">
-                  <div className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <button
+                    onClick={() => handleSort('role')}
+                    className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
+                  >
                     Role
-                    <ChevronDownIcon className="h-3 w-3" />
-                  </div>
+                    {renderSortIcon('role')}
+                  </button>
                 </th>
                 <th className="text-right py-3 px-6">
                   <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -184,7 +230,7 @@ const Users = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredUsers.map((user) => {
+              {sortedUsers.map((user) => {
                 const roleBadge = getRoleBadge(user.role);
                 return (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -193,11 +239,9 @@ const Users = () => {
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={getUserAvatar(user)}
-                          alt={user.name}
-                          className="w-10 h-10 rounded-full"
-                        />
+                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                          {getUserAvatar(user)}
+                        </div>
                         <div className="font-medium text-gray-900 dark:text-gray-100">{user.name}</div>
                       </div>
                     </td>
@@ -231,7 +275,6 @@ const Users = () => {
                         >
                           <EllipsisVerticalIcon className="h-4 w-4" />
                         </button>
-
                         {/* Dropdown menu */}
                         {openMenuId === user.id && (
                           <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">

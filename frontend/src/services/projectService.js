@@ -1,7 +1,7 @@
 import api from './api';
 
 export const projectService = {
-  getAll: (page = 1) => api.get('/projects', { params: { page } }),
+  getAll: (page = 1, additionalParams = {}) => api.get('/projects', { params: { page, ...additionalParams } }),
   getAllWithoutPagination: () => api.get('/projects', { params: { per_page: 1000 } }),
   getById: (id) => api.get(`/projects/${id}`),
   create: (data) => api.post('/projects', data),

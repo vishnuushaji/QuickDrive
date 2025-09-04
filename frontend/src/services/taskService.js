@@ -1,7 +1,7 @@
 import api from './api';
 
 export const taskService = {
-  getAll: (page = 1) => api.get('/tasks', { params: { page } }),
+  getAll: (page = 1, additionalParams = {}) => api.get('/tasks', { params: { page, ...additionalParams } }),
   getById: (id) => api.get(`/tasks/${id}`),
   
   create: (data) => {

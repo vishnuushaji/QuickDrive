@@ -20,12 +20,35 @@ class ProjectController extends Controller
             }
 
             $perPage = $request->get('per_page', 10);
+            $search = $request->get('search', '');
+            $statusFilter = $request->get('status', '');
 
-            if ($user->isSuperAdmin()) {
-                $projects = Project::with(['users', 'tasks'])->paginate($perPage);
-            } else {
-                $projects = $user->projects()->with(['users', 'tasks'])->paginate($perPage);
+            $query = Project::with(['users', 'tasks']);
+
+            // Apply user-based filtering
+            if (!$user->isSuperAdmin()) {
+                $query->whereHas('users', function ($userQuery) use ($user) {
+                    $userQuery->where('users.id', $user->id);
+                });
             }
+
+            // Apply search filter
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('description', 'like', '%' . $search . '%')
+                      ->orWhereHas('users', function ($userQuery) use ($search) {
+                          $userQuery->where('name', 'like', '%' . $search . '%');
+                      });
+                });
+            }
+
+            // Apply status filter
+            if (!empty($statusFilter) && $statusFilter !== 'all') {
+                $query->where('status', $statusFilter);
+            }
+
+            $projects = $query->paginate($perPage);
 
             // Add progress to each project
             $projects->each(function ($project) {

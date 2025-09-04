@@ -118,11 +118,9 @@ const Header = ({ onMenuToggle }) => {
 
             {/* Sheet Footer */}
             <div className="flex items-center justify-between shrink-0 ps-4 pe-3.5 h-14">
-              <img
-                className="size-9 rounded-full border-2 border-secondary shrink-0 cursor-pointer"
-                src={`/assets/media/avatars/gray/${((user?.id % 5) + 1)}.png`}
-                alt="User Avatar"
-              />
+              <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 border-2 border-secondary shrink-0 cursor-pointer flex items-center justify-center text-white font-semibold text-sm">
+                {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+              </div>
 
               <div className="flex items-center gap-1.5">
                 <button className="flex items-center justify-center w-10 h-10 rounded-md hover:bg-background">
