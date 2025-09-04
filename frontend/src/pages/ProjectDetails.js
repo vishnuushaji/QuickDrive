@@ -250,10 +250,23 @@ const ProjectDetails = () => {
 
         {/* Tasks Section */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 flex items-center">
-            <ClipboardListIcon className="h-4 w-4 mr-1" />
-            Project Tasks ({project.tasks?.length || 0})
-          </h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
+              <ClipboardListIcon className="h-4 w-4 mr-1" />
+              Project Tasks ({project.tasks?.length || 0})
+            </h3>
+            {isSuperAdmin && (
+              <Link
+                to={`/tasks/create?project_id=${project.id}`}
+                className="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Add Task
+              </Link>
+            )}
+          </div>
           
           {project.tasks && project.tasks.length > 0 ? (
             <div className="space-y-3">
@@ -312,8 +325,8 @@ const ProjectDetails = () => {
               <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Tasks Yet</h4>
               <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first task for this project</p>
               {isSuperAdmin && (
-                <Link 
-                  to="/tasks/create" 
+                <Link
+                  to={`/tasks/create?project_id=${project.id}`}
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                   Create Task

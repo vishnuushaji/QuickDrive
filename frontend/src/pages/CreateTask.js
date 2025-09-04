@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { taskService } from '../services/taskService';
 import { projectService } from '../services/projectService';
 import { userService } from '../services/userService';
@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 const CreateTask = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -17,7 +18,7 @@ const CreateTask = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    project_id: '',
+    project_id: searchParams.get('project_id') || '',
     assigned_user_id: '',
     priority: 'normal',
     status: 'pending',
@@ -385,13 +386,16 @@ const CreateTask = () => {
                     onBlur={handleBlur}
                     className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200"
                   >
-                    <option value="">Select a developer</option>
+                    <option value="">Select a developer (auto-assigned if empty)</option>
                     {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.name}
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    If no developer is selected, the task will be automatically assigned to the first developer in the project.
+                  </p>
                 </div>
               </div>
 

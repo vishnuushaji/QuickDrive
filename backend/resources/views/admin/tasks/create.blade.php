@@ -43,11 +43,11 @@
                                 <!-- Project Selection -->
                                 <div>
                                     <label class="kt-form-label required">Project</label>
-                                    <select name="project_id" class="kt-select @error('project_id') kt-input-invalid @enderror" 
+                                    <select name="project_id" class="kt-select @error('project_id') kt-input-invalid @enderror"
                                             data-kt-select="true" data-placeholder="Select project" required>
                                         <option value="">Select Project</option>
                                         @foreach($projects as $project)
-                                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                                            <option value="{{ $project->id }}" {{ (old('project_id') == $project->id || (isset($selectedProjectId) && $selectedProjectId == $project->id)) ? 'selected' : '' }}>
                                                 {{ $project->name }}
                                             </option>
                                         @endforeach
@@ -82,9 +82,9 @@
                                 <!-- Developer Assignment -->
                                 <div>
                                     <label class="kt-form-label">Assign To Developer</label>
-                                    <select name="assigned_user_id" class="kt-select @error('assigned_user_id') kt-input-invalid @enderror" 
+                                    <select name="assigned_user_id" class="kt-select @error('assigned_user_id') kt-input-invalid @enderror"
                                             data-kt-select="true" data-placeholder="Select developer">
-                                        <option value="">Select Developer</option>
+                                        <option value="">Select Developer (auto-assigned if empty)</option>
                                         @foreach($developers as $developer)
                                             <option value="{{ $developer->id }}" {{ old('assigned_user_id') == $developer->id ? 'selected' : '' }}>
                                                 {{ $developer->name }} - {{ $developer->email }}
@@ -94,7 +94,7 @@
                                     @error('assigned_user_id')
                                         <div class="kt-form-invalid">{{ $message }}</div>
                                     @enderror
-                                    <div class="kt-form-help">Leave empty to assign later</div>
+                                    <div class="kt-form-help">If no developer is selected, the task will be automatically assigned to the first developer in the project.</div>
                                 </div>
 
                                 <!-- Priority -->

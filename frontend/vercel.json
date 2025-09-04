@@ -1,15 +1,13 @@
 {
-  "version": 2,
-  "rootDirectory": "frontend",
-  "env": {
-    "REACT_APP_API_BASE_URL": "https://quickdrive-9xxc.onrender.com/api",
-    "REACT_APP_APP_NAME": "Project Management System",
-    "REACT_APP_VERSION": "1.0.0"
-  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "REACT_APP_API_BASE_URL": "https://quickdrive-9xxc.onrender.com/api"
+  }
 }

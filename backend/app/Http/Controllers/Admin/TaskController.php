@@ -67,18 +67,22 @@ class TaskController extends Controller
         return view('admin.tasks.show', compact('task'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = auth()->user();
-        
+
         if ($user->isSuperAdmin()) {
             $projects = Project::all();
         } else {
             $projects = $user->projects;
         }
-        
+
         $developers = User::where('role', 'developer')->get();
-        return view('admin.tasks.create', compact('projects', 'developers'));
+
+        // Get project_id from request if provided
+        $selectedProjectId = $request->get('project_id');
+
+        return view('admin.tasks.create', compact('projects', 'developers', 'selectedProjectId'));
     }
 
     public function store(Request $request)
@@ -94,6 +98,15 @@ class TaskController extends Controller
             'hours' => 'nullable|integer|min:1',
             'attachment' => 'nullable|file|max:10240'
         ]);
+
+        // Auto-assign to first developer if none selected
+        if (empty($validated['assigned_user_id'])) {
+            $project = Project::find($validated['project_id']);
+            $firstDeveloper = $project->developers()->first();
+            if ($firstDeveloper) {
+                $validated['assigned_user_id'] = $firstDeveloper->id;
+            }
+        }
 
         if ($request->hasFile('attachment')) {
             $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
