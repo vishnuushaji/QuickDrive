@@ -6,6 +6,7 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',          // local dev
         'https://quickdrive-1.onrender.com', // Render frontend
+        'https://quick-drive-five.vercel.app',
     ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
