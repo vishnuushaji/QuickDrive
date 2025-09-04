@@ -3,49 +3,31 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useForm } from 'react-hook-form';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    acceptTerms: false
-  });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register } = useAuth();
+  const { register: registerUser } = useAuth();
   const navigate = useNavigate();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!formData.acceptTerms) {
-      toast.error('Please accept the terms and conditions');
-      return;
-    }
-    
+  const password = watch("password");
+
+  const onSubmit = async (data) => {
     setLoading(true);
-    
-    const result = await register(formData);
-    
+
+    const result = await registerUser(data);
+
     if (result.success) {
       toast.success('Registration successful!');
       navigate('/dashboard');
     } else {
       toast.error(result.error);
     }
-    
-    setLoading(false);
-  };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    setLoading(false);
   };
 
   return (
@@ -101,7 +83,7 @@ const Register = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
               Full Name
@@ -111,12 +93,19 @@ const Register = () => {
               name="name"
               type="text"
               autoComplete="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("name", {
+                required: "Full name is required",
+                minLength: {
+                  value: 2,
+                  message: "Name must be at least 2 characters"
+                }
+              })}
+              className={`w-full px-3.5 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                errors.name ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="John Doe"
             />
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
           </div>
 
           <div>
@@ -128,12 +117,19 @@ const Register = () => {
               name="email"
               type="email"
               autoComplete="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+$/i,
+                  message: "Invalid email address"
+                }
+              })}
+              className={`w-full px-3.5 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="email@email.com"
             />
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -146,10 +142,20 @@ const Register = () => {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters"
+                  },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                    message: "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+                  }
+                })}
+                className={`w-full px-3.5 py-2.5 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="Enter Password"
               />
               <button
@@ -164,6 +170,7 @@ const Register = () => {
                 )}
               </button>
             </div>
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </div>
 
           <div>
@@ -176,10 +183,13 @@ const Register = () => {
                 name="password_confirmation"
                 type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
-                required
-                value={formData.password_confirmation}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                {...register("password_confirmation", {
+                  required: "Please confirm your password",
+                  validate: value => value === password || "Passwords do not match"
+                })}
+                className={`w-full px-3.5 py-2.5 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="Re-enter Password"
               />
               <button
@@ -194,6 +204,7 @@ const Register = () => {
                 )}
               </button>
             </div>
+            {errors.password_confirmation && <p className="mt-1 text-sm text-red-600">{errors.password_confirmation.message}</p>}
           </div>
 
           <div className="flex items-center">
@@ -201,8 +212,9 @@ const Register = () => {
               id="acceptTerms"
               name="acceptTerms"
               type="checkbox"
-              checked={formData.acceptTerms}
-              onChange={handleChange}
+              {...register("acceptTerms", {
+                required: "You must accept the terms and conditions"
+              })}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-700">
@@ -212,10 +224,11 @@ const Register = () => {
               </Link>
             </label>
           </div>
+          {errors.acceptTerms && <p className="mt-1 text-sm text-red-600">{errors.acceptTerms.message}</p>}
 
           <button
             type="submit"
-            disabled={loading || !formData.acceptTerms}
+            disabled={loading}
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Creating account...' : 'Sign up'}

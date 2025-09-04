@@ -3,40 +3,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useForm } from 'react-hook-form';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
-  });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setLoading(true);
-    
-    const result = await login(formData);
-    
+
+    const result = await login(data);
+
     if (result.success) {
       toast.success('Login successful!');
       navigate('/dashboard');
     } else {
       toast.error(result.error);
     }
-    
-    setLoading(false);
-  };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    setLoading(false);
   };
 
   return (
@@ -92,7 +80,7 @@ const Login = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
               Email
@@ -102,12 +90,19 @@ const Login = () => {
               name="email"
               type="email"
               autoComplete="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+$/i,
+                  message: "Invalid email address"
+                }
+              })}
+              className={`w-full px-3.5 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="email@email.com"
             />
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div>
@@ -125,10 +120,16 @@ const Login = () => {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters"
+                  }
+                })}
+                className={`w-full px-3.5 py-2.5 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="Enter Password"
               />
               <button
@@ -143,6 +144,7 @@ const Login = () => {
                 )}
               </button>
             </div>
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </div>
 
           <div className="flex items-center">
@@ -150,8 +152,7 @@ const Login = () => {
               id="rememberMe"
               name="rememberMe"
               type="checkbox"
-              checked={formData.rememberMe}
-              onChange={handleChange}
+              {...register("rememberMe")}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
