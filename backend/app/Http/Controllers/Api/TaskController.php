@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -143,16 +142,55 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
-        $this->authorize('delete', $task);
-        
-        // Delete attachment if exists
-        if ($task->attachment) {
-            Storage::disk('public')->delete($task->attachment);
+        try {
+            // Load relationships needed for authorization
+            $task->load(['project.users', 'assignedUser']);
+            
+            $user = auth()->user();
+            
+            // Check authorization using policy
+            if (!$user->can('delete', $task)) {
+                return response()->json([
+                    'error' => 'Unauthorized',
+                    'message' => 'You are not authorized to delete this task'
+                ], 403);
+            }
+
+            // Delete attachment if exists
+            if ($task->attachment) {
+                try {
+                    Storage::disk('public')->delete($task->attachment);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to delete task attachment: ' . $e->getMessage());
+                    // Continue with task deletion even if attachment deletion fails
+                }
+            }
+
+            // Delete the task
+            $task->delete();
+
+            Log::info('Task deleted successfully', [
+                'task_id' => $task->id,
+                'deleted_by' => $user->id,
+                'user_role' => $user->role
+            ]);
+
+            return response()->json([
+                'message' => 'Task deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting task: ' . $e->getMessage(), [
+                'task_id' => $task->id,
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to delete task',
+                'message' => 'An error occurred while deleting the task. Please try again.'
+            ], 500);
         }
-        
-        $task->delete();
-        
-        return response()->json(['message' => 'Task deleted successfully']);
     }
 
     public function updateStatus(Request $request, Task $task)
@@ -164,6 +202,7 @@ class TaskController extends Controller
         $oldStatus = $task->status;
         $task->status = $validated['status'];
         $task->save();
+
         $task->load(['project', 'assignedUser']);
 
         // Send notification if task is completed

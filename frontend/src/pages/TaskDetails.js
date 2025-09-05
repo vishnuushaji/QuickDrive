@@ -126,7 +126,7 @@ const TaskDetails = () => {
   }
 
   const canEdit = isSuperAdmin;
-  const canDelete = isSuperAdmin || (isDeveloper && task.assigned_user_id === user?.id);
+  const canDelete = isSuperAdmin; // Only super admins can delete tasks
   const canApprove = isClient && task.status === 'completed';
   const canUpdateStatus = isDeveloper && task.assigned_user_id === user?.id;
 
