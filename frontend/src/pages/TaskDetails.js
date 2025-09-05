@@ -26,6 +26,8 @@ const TaskDetails = () => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const BACKEND_BASE_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+
   const fetchTask = useCallback(async () => {
     try {
       const response = await taskService.getById(id);
@@ -339,7 +341,7 @@ const TaskDetails = () => {
             </h3>
             <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <a
-                href={`/storage/${task.attachment}`}
+                href={`${BACKEND_BASE_URL}/storage/${task.attachment}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 flex items-center"
