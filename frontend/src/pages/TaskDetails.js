@@ -360,7 +360,7 @@ const TaskDetails = () => {
           {(canUpdateStatus || canApprove) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Status Update Actions */}
-              {canUpdateStatus && task.status !== 'approved' && task.status !== 'rejected' && (
+              {canUpdateStatus && task.status !== 'approved' && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Update Status</h4>
                   <div className="space-y-2">

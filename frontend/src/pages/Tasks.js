@@ -326,7 +326,7 @@ const Tasks = () => {
                 </div>
 
                 {/* Status Update for Developer */}
-                {isDeveloper && task.assigned_user_id === user?.id && task.status !== 'approved' && task.status !== 'rejected' && (
+                {isDeveloper && task.assigned_user_id === user?.id && task.status !== 'approved' && (
                   <div className="mb-4">
                     <select
                       value={task.status}
@@ -437,7 +437,7 @@ const Tasks = () => {
                     </div>
 
                     {/* Status Update for Developer */}
-                    {isDeveloper && task.assigned_user_id === user?.id && task.status !== 'approved' && task.status !== 'rejected' && (
+                    {isDeveloper && task.assigned_user_id === user?.id && task.status !== 'approved' && (
                       <div className="hidden lg:block min-w-[140px]">
                         <select
                           value={task.status}

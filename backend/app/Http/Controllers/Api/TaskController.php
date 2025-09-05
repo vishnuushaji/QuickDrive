@@ -195,6 +195,16 @@ class TaskController extends Controller
 
     public function updateStatus(Request $request, Task $task)
     {
+        $user = auth()->user();
+
+        // Check if user is authorized to update this task
+        if (!$user->isSuperAdmin() && (!$user->isDeveloper() || $task->assigned_user_id != $user->id)) {
+            return response()->json([
+                'error' => 'Unauthorized',
+                'message' => 'You can only update the status of tasks assigned to you'
+            ], 403);
+        }
+
         $validated = $request->validate([
             'status' => 'required|in:pending,in_progress,completed',
         ]);
